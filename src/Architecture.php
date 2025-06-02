@@ -112,6 +112,8 @@ final readonly class Architecture implements ArchitectureInterface
      * architecture.
      *
      * @api
+     *
+     * @param non-empty-string $name
      */
     public static function tryFrom(string $name): ?BuiltinArchitecture
     {
@@ -126,6 +128,8 @@ final readonly class Architecture implements ArchitectureInterface
      * given name.
      *
      * @api
+     *
+     * @param non-empty-string $name
      */
     public static function from(string $name): ArchitectureInterface
     {
@@ -139,6 +143,7 @@ final readonly class Architecture implements ArchitectureInterface
      * defined in this class.
      *
      * @api
+     *
      * @return non-empty-list<ArchitectureInterface>
      */
     public static function cases(): array
