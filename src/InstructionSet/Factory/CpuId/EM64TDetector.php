@@ -8,21 +8,21 @@ use Boson\Component\CpuInfo\InstructionSet;
 use Boson\Component\CpuInfo\InstructionSetInterface;
 use Boson\Component\Pasm\ExecutorInterface;
 
-final readonly class SSE3Detector extends AMD64Detector
+final readonly class EM64TDetector extends AMD64Detector
 {
     public function detect(ExecutorInterface $executor): ?InstructionSetInterface
     {
         $detector = $executor->compile(
             signature: 'int32_t(*)()',
-            code: "\xB8\x01\x00\x00\x00"      // mov eax, 0x1
-                . "\x0F\xA2"                  // cpuid
-                . "\xF7\xC1\x01\x00\x00\x00"  // test ecx, 0x00000001 (1 << 0)
-                . "\x0F\x94\xC0"              // setz al
-                . "\x34\x01"                  // xor al, 1
-                . "\xC3"                      // ret
+            code: "\xB8\x01\x00\x00\x80"     // mov eax, 0x80000001
+                . "\x0F\xA2"                 // cpuid
+                . "\xF7\xC2\x00\x00\x00\x20" // test edx, 0x20000000 (1 << 29)
+                . "\x0F\x94\xC0"             // setz al
+                . "\x34\x01"                 // xor al, 1
+                . "\xC3"                     // ret
         );
 
         /** @phpstan-ignore-next-line : Known ignored issue */
-        return $detector() ? InstructionSet::SSE3 : null;
+        return $detector() ? InstructionSet::EM64T : null;
     }
 }
