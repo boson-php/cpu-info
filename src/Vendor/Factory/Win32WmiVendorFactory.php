@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Boson\Component\CpuInfo\Vendor\Factory;
 
 use Boson\Component\CpuInfo\Vendor\VendorInfo;
+use Boson\Component\CpuInfo\Vendor\VendorInfoInterface;
 use Boson\Component\OsInfo\Family;
 use Boson\Component\OsInfo\Family\Factory\FamilyFactoryInterface as OsFamilyFactoryInterface;
 use COM as ComExtension;
@@ -21,7 +22,7 @@ final readonly class Win32WmiVendorFactory implements VendorFactoryInterface
         private ?OsFamilyFactoryInterface $osFamilyFactory = null,
     ) {}
 
-    public function createVendor(): VendorInfo
+    public function createVendor(): VendorInfoInterface
     {
         $family = $this->osFamilyFactory?->createFamily()
             ?? Family::createFromGlobals();
@@ -39,7 +40,7 @@ final readonly class Win32WmiVendorFactory implements VendorFactoryInterface
         }
     }
 
-    private function tryCreateFromWmi(VendorInfo $fallback): VendorInfo
+    private function tryCreateFromWmi(VendorInfoInterface $fallback): VendorInfoInterface
     {
         $wmi = new ComExtension(self::WMI_MODULE_NAME, null, \CP_UTF8);
 

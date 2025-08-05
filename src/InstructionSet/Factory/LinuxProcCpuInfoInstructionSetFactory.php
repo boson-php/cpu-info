@@ -7,7 +7,7 @@ namespace Boson\Component\CpuInfo\InstructionSet\Factory;
 use Boson\Component\CpuInfo\ArchitectureInterface;
 use Boson\Component\CpuInfo\InstructionSet;
 use Boson\Component\CpuInfo\InstructionSetInterface;
-use Boson\Component\CpuInfo\Internal\LinuxProcCpuInfo;
+use Boson\Component\CpuInfo\Internal\LinuxProcCpuInfoReader;
 
 final readonly class LinuxProcCpuInfoInstructionSetFactory implements OptionalInstructionSetFactoryInterface
 {
@@ -16,22 +16,20 @@ final readonly class LinuxProcCpuInfoInstructionSetFactory implements OptionalIn
      */
     public function createInstructionSets(ArchitectureInterface $arch): ?array
     {
-        if (!LinuxProcCpuInfo::isReadable()) {
+        if (!LinuxProcCpuInfoReader::isReadable()) {
             return null;
         }
 
-        $processors = new LinuxProcCpuInfo()
-            ->getSegmentsByPhysicalId();
+        $processors = new LinuxProcCpuInfoReader()
+            ->read();
 
         $result = [];
 
         foreach ($processors as $processor) {
-            foreach ($processor as $core) {
-                $flags = $core['flags'] ?? '';
+            $flags = $processor['flags'] ?? '';
 
-                foreach ($this->parseFlags($flags) as $flag => $set) {
-                    $result[$flag] = $set;
-                }
+            foreach ($this->parseFlags($flags) as $flag => $set) {
+                $result[$flag] = $set;
             }
         }
 

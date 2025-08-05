@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Boson\Component\CpuInfo\Vendor\Factory;
 
 use Boson\Component\CpuInfo\Vendor\VendorInfo;
+use Boson\Component\CpuInfo\Vendor\VendorInfoInterface;
 
 final readonly class EnvVendorFactory implements VendorFactoryInterface
 {
@@ -71,7 +72,7 @@ final readonly class EnvVendorFactory implements VendorFactoryInterface
         return null;
     }
 
-    public function createVendor(): VendorInfo
+    public function createVendor(): VendorInfoInterface
     {
         $fallback = $this->delegate->createVendor();
 

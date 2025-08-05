@@ -4,8 +4,9 @@ declare(strict_types=1);
 
 namespace Boson\Component\CpuInfo\Vendor\Factory;
 
-use Boson\Component\CpuInfo\Internal\LinuxProcCpuInfo;
+use Boson\Component\CpuInfo\Internal\LinuxProcCpuInfoReader;
 use Boson\Component\CpuInfo\Vendor\VendorInfo;
+use Boson\Component\CpuInfo\Vendor\VendorInfoInterface;
 use Boson\Component\OsInfo\Family;
 use Boson\Component\OsInfo\Family\Factory\FamilyFactoryInterface as OsFamilyFactoryInterface;
 
@@ -16,26 +17,26 @@ final readonly class LinuxProcCpuInfoVendorFactory implements VendorFactoryInter
         private ?OsFamilyFactoryInterface $osFamilyFactory = null,
     ) {}
 
-    public function createVendor(): VendorInfo
+    public function createVendor(): VendorInfoInterface
     {
         $family = $this->osFamilyFactory?->createFamily()
             ?? Family::createFromGlobals();
 
         $fallback = $this->delegate->createVendor();
 
-        if (!$family->is(Family::Linux) || !LinuxProcCpuInfo::isReadable()) {
+        if (!$family->is(Family::Linux) || !LinuxProcCpuInfoReader::isReadable()) {
             return $fallback;
         }
 
         return $this->tryCreateFromProcCpuInfo($fallback);
     }
 
-    private function tryCreateFromProcCpuInfo(VendorInfo $fallback): VendorInfo
+    private function tryCreateFromProcCpuInfo(VendorInfoInterface $fallback): VendorInfoInterface
     {
-        $processors = new LinuxProcCpuInfo()
-            ->getSegmentsByPhysicalId();
+        $processors = new LinuxProcCpuInfoReader()
+            ->read();
 
-        $name = $this->getProcessorName($processors);
+        $name = $this->getFirstProcessorName($processors);
 
         if ($name === null || $name === '') {
             return $fallback;
@@ -43,7 +44,7 @@ final readonly class LinuxProcCpuInfoVendorFactory implements VendorFactoryInter
 
         return new VendorInfo(
             name: $name,
-            vendor: $this->getProcessorVendor($processors)
+            vendor: $this->getFirstProcessorVendor($processors)
                 ?? $fallback->vendor,
             physicalCores: $this->getProcessorPhysicalCores($processors)
                 ?? $fallback->physicalCores,
@@ -53,51 +54,63 @@ final readonly class LinuxProcCpuInfoVendorFactory implements VendorFactoryInter
     }
 
     /**
-     * @param array<numeric-string|int, list<array<non-empty-string, string>>> $processors
+     * @param list<array<non-empty-string, string>> $processors
      *
      * @return int<1, max>|null
      */
     private function getProcessorPhysicalCores(array $processors): ?int
     {
-        foreach ($processors as $cores) {
-            return \max(1, \count($cores));
+        $physicalCores = [];
+
+        foreach ($processors as $processor) {
+            // Key is "<CPU ID> : <PHYSICAL CORE ID> : <LOGICAL CORE ID>"
+            $index = ($processor['physical id'] ?? '0') . ':'
+                . ($processor['core id'] ?? '0');
+
+            $physicalCores[$index] = true;
         }
 
-        return null;
+        $result = \count($physicalCores);
+
+        return $result === 0 ? null : $result;
     }
 
     /**
-     * @param array<numeric-string|int, list<array<non-empty-string, string>>> $processors
+     * @param list<array<non-empty-string, string>> $processors
      *
      * @return int<1, max>|null
      */
     private function getProcessorLogicalCores(array $processors): ?int
     {
-        $cores = 0;
+        $logicalCores = [];
 
         foreach ($processors as $processor) {
-            foreach ($processor as $core) {
-                $cores += \max(1, (int) ($core['cpu cores'] ?? 0));
-            }
+            // Key is "<CPU ID> : <PHYSICAL CORE ID>"
+            $index = ($processor['processor'] ?? '0') . ':'
+                . ($processor['physical id'] ?? '0');
+
+            $logicalCores[$index] = true;
         }
 
-        return $cores === 0 ? null : $cores;
+        $result = \count($logicalCores);
+
+        return $result === 0 ? null : $result;
     }
 
     /**
-     * @param array<numeric-string|int, list<array<non-empty-string, string>>> $processors
+     * Gets first found CPU name
+     *
+     * @param list<array<non-empty-string, string>> $processors
      *
      * @return non-empty-string|null
      */
-    private function getProcessorName(array $processors): ?string
+    private function getFirstProcessorName(array $processors): ?string
     {
         foreach ($processors as $processor) {
-            foreach ($processor as $core) {
-                $name = $core['model name'] ?? null;
+            $name = $processor['model name'] ?? null;
 
-                if ($name !== null && $name !== '') {
-                    return $name;
-                }
+            if ($name !== null && $name !== '') {
+                return $name;
             }
         }
 
@@ -105,19 +118,19 @@ final readonly class LinuxProcCpuInfoVendorFactory implements VendorFactoryInter
     }
 
     /**
-     * @param array<numeric-string|int, list<array<non-empty-string, string>>> $processors
+     * Gets first found CPU`s vendor name
+     *
+     * @param list<array<non-empty-string, string>> $processors
      *
      * @return non-empty-string|null
      */
-    private function getProcessorVendor(array $processors): ?string
+    private function getFirstProcessorVendor(array $processors): ?string
     {
         foreach ($processors as $processor) {
-            foreach ($processor as $core) {
-                $vendor = $core['vendor_id'] ?? null;
+            $vendor = $processor['vendor_id'] ?? null;
 
-                if ($vendor !== null && $vendor !== '') {
-                    return $vendor;
-                }
+            if ($vendor !== null && $vendor !== '') {
+                return $vendor;
             }
         }
 

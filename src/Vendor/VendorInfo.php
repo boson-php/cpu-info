@@ -4,18 +4,14 @@ declare(strict_types=1);
 
 namespace Boson\Component\CpuInfo\Vendor;
 
-readonly class VendorInfo implements \Stringable
+readonly class VendorInfo implements VendorInfoInterface, \Stringable
 {
     public function __construct(
         /**
-         * Gets current CPU name
-         *
          * @var non-empty-string
          */
         public string $name,
         /**
-         * Gets current CPU generic vendor name
-         *
          * @var non-empty-string|null
          */
         public ?string $vendor = null,
