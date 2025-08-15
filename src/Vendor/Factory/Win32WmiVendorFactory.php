@@ -24,7 +24,7 @@ final readonly class Win32WmiVendorFactory implements VendorFactoryInterface
 
     public function createVendor(): VendorInfoInterface
     {
-        $family = $this->osFamilyFactory?->createFamily()
+        $family = $this->osFamilyFactory?->createFamilyFromGlobals()
             ?? Family::createFromGlobals();
 
         $fallback = $this->delegate->createVendor();
