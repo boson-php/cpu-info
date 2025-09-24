@@ -8,12 +8,8 @@ use Boson\Component\CpuInfo\Architecture\Factory\ArchitectureFactoryInterface;
 use Boson\Component\CpuInfo\ArchitectureInterface;
 use Boson\Component\CpuInfo\CentralProcessor;
 use Boson\Component\CpuInfo\Factory\CentralProcessorFactoryInterface;
-use Boson\Component\CpuInfo\InstructionSet\Factory\CpuId\DetectorInterface;
-use Boson\Component\CpuInfo\InstructionSet\Factory\InstructionSetFactoryInterface;
-use Boson\Component\CpuInfo\InstructionSet\Factory\OptionalInstructionSetFactoryInterface;
+use Boson\Component\CpuInfo\Factory\Driver\CpuId\DetectorInterface;
 use Boson\Component\CpuInfo\InstructionSetInterface;
-use Boson\Component\CpuInfo\Vendor\Factory\VendorFactoryInterface;
-use Boson\Component\CpuInfo\Vendor\VendorInfo;
 use Boson\Component\Pasm\ExecutorInterface;
 use PHPUnit\Framework\Attributes\DoesNotPerformAssertions;
 use PHPUnit\Framework\Attributes\Group;
@@ -38,6 +34,10 @@ final class CompatibilityTest extends TestCase
 
             public function is(ArchitectureInterface $arch): bool {}
 
+            public function equals(mixed $other): bool {}
+
+            public function toString(): string {}
+
             public function __toString(): string {}
         };
     }
@@ -49,6 +49,10 @@ final class CompatibilityTest extends TestCase
             public string $name {
                 get {}
             }
+
+            public function equals(mixed $other): bool {}
+
+            public function toString(): string {}
 
             public function __toString(): string {}
         };
@@ -73,34 +77,10 @@ final class CompatibilityTest extends TestCase
     }
 
     #[DoesNotPerformAssertions]
-    public function testInstructionSetFactoryInterfaceCompatibility(): void
-    {
-        new class implements InstructionSetFactoryInterface {
-            public function createInstructionSets(ArchitectureInterface $arch): iterable {}
-        };
-    }
-
-    #[DoesNotPerformAssertions]
-    public function testOptionalInstructionSetFactoryInterfaceCompatibility(): void
-    {
-        new class implements OptionalInstructionSetFactoryInterface {
-            public function createInstructionSets(ArchitectureInterface $arch): ?iterable {}
-        };
-    }
-
-    #[DoesNotPerformAssertions]
     public function testCentralProcessorFactoryInterfaceCompatibility(): void
     {
         new class implements CentralProcessorFactoryInterface {
             public function createCentralProcessor(): CentralProcessor {}
-        };
-    }
-
-    #[DoesNotPerformAssertions]
-    public function testVendorFactoryInterfaceCompatibility(): void
-    {
-        new class implements VendorFactoryInterface {
-            public function createVendor(): VendorInfo {}
         };
     }
 }

@@ -4,13 +4,18 @@ declare(strict_types=1);
 
 namespace Boson\Component\CpuInfo;
 
-interface ArchitectureInterface extends \Stringable
+use Boson\Contracts\ValueObject\StringValueObjectInterface;
+
+/**
+ * @template-extends StringValueObjectInterface<non-empty-string>
+ */
+interface ArchitectureInterface extends StringValueObjectInterface
 {
     /**
-     * Gets the name of the CPU architecture.
+     * Gets the name of the CPU architecture
      *
      * The name should be a non-empty string that uniquely
-     * identifies this architecture.
+     * identifies this architecture
      *
      * @var non-empty-string
      */
@@ -19,9 +24,9 @@ interface ArchitectureInterface extends \Stringable
     }
 
     /**
-     * Gets the parent CPU architecture, if any.
+     * Gets the parent CPU architecture, if any
      *
-     * Returns {@see null} if this arch is a root architecture (has no parent).
+     * Returns {@see null} if this arch is a root architecture (has no parent)
      */
     public ?self $parent {
         get;
@@ -29,7 +34,7 @@ interface ArchitectureInterface extends \Stringable
 
     /**
      * Checks if this architecture is the same as or a descendant
-     * of the given architecture.
+     * of the given architecture
      */
     public function is(ArchitectureInterface $arch): bool;
 }
