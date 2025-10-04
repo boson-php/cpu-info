@@ -4,12 +4,7 @@ declare(strict_types=1);
 
 namespace Boson\Component\CpuInfo;
 
-use Boson\Contracts\ValueObject\StringValueObjectInterface;
-
-/**
- * @template-extends StringValueObjectInterface<non-empty-string>
- */
-interface InstructionSetInterface extends StringValueObjectInterface
+interface InstructionSetInterface extends \Stringable
 {
     /**
      * @var non-empty-string

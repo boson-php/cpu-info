@@ -6,67 +6,39 @@ namespace Boson\Component\CpuInfo;
 
 use Boson\Component\CpuInfo\Factory\DefaultCentralProcessorFactory;
 use Boson\Component\CpuInfo\Factory\InMemoryCentralProcessorFactory;
+use Boson\Component\CpuInfo\Vendor\VendorInfo;
 
-final readonly class CentralProcessor
+final readonly class CentralProcessor extends VendorInfo implements
+    CentralProcessorInterface
 {
     /**
-     * Gets list of supported processor instructions
-     *
      * @var list<InstructionSetInterface>
      */
     public array $instructionSets;
 
     /**
+     * @param non-empty-string $name
+     * @param non-empty-string|null $vendor
+     * @param int<1, max> $physicalCores
+     * @param int<1, max> $logicalCores
      * @param iterable<mixed, InstructionSetInterface> $instructionSets
      */
     public function __construct(
-        /**
-         * Gets current CPU architecture type
-         */
         public ArchitectureInterface $arch,
-        /**
-         * Gets current CPU generic vendor name.
-         *
-         * @var non-empty-string
-         */
-        public string $vendor,
-        /**
-         * Gets current CPU name.
-         *
-         * @var non-empty-string|null
-         */
-        public ?string $name = null,
-        /**
-         * Gets the number of physical CPU cores.
-         *
-         * @var int<1, max>
-         */
-        public int $cores = 1,
-        /**
-         * Gets the number of logical CPU cores.
-         *
-         * Note: The number of logical cores can be equal to or greater
-         *       than the number of physical cores ({@see $cores}).
-         *
-         * @var int<1, max>
-         */
-        public int $threads = 1,
+        string $name,
+        ?string $vendor = null,
+        int $physicalCores = 1,
+        int $logicalCores = 1,
         iterable $instructionSets = [],
     ) {
         $this->instructionSets = \iterator_to_array($instructionSets, false);
-    }
 
-    /**
-     * @api
-     */
-    public static function createFromGlobals(): CentralProcessor
-    {
-        /** @phpstan-var InMemoryCentralProcessorFactory $factory */
-        static $factory = new InMemoryCentralProcessorFactory(
-            delegate: new DefaultCentralProcessorFactory(),
+        parent::__construct(
+            name: $name,
+            vendor: $vendor,
+            physicalCores: $physicalCores,
+            logicalCores: $logicalCores,
         );
-
-        return $factory->createCentralProcessor();
     }
 
     /**
@@ -77,5 +49,18 @@ final readonly class CentralProcessor
     public function isSupports(InstructionSetInterface $instructionSet): bool
     {
         return \in_array($instructionSet, $this->instructionSets, true);
+    }
+
+    /**
+     * @api
+     */
+    public static function createFromGlobals(): CentralProcessorInterface
+    {
+        /** @phpstan-var InMemoryCentralProcessorFactory $factory */
+        static $factory = new InMemoryCentralProcessorFactory(
+            delegate: new DefaultCentralProcessorFactory(),
+        );
+
+        return $factory->createCentralProcessor();
     }
 }

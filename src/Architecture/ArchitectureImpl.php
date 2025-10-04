@@ -25,18 +25,6 @@ trait ArchitectureImpl
             || $this->parent?->is($architecture) === true;
     }
 
-    public function equals(mixed $other): bool
-    {
-        return $other === $this
-            || ($other instanceof ArchitectureInterface
-                && $other->name === $this->name);
-    }
-
-    public function toString(): string
-    {
-        return $this->name;
-    }
-
     public function __toString(): string
     {
         return $this->name;
