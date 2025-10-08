@@ -14,21 +14,24 @@ final readonly class EnvArchitectureFactory implements ArchitectureFactoryInterf
      */
     public const string DEFAULT_OVERRIDE_ENV_NAME = 'BOSON_CPU_ARCH';
 
-    /**
-     * @var non-empty-string
-     */
-    public const string DEFAULT_ENV_NAME = 'PROCESSOR_ARCHITECTURE';
-
     public function __construct(
         private ArchitectureFactoryInterface $delegate,
         /**
          * @var list<non-empty-string>
          */
-        private array $envVariableNames = [
-            self::DEFAULT_OVERRIDE_ENV_NAME,
-            self::DEFAULT_ENV_NAME,
-        ],
+        private array $envVariableNames = [],
     ) {}
+
+    /**
+     * Creates an instance configured to use the default override
+     * environment variable.
+     */
+    public static function createForOverrideEnvVariables(ArchitectureFactoryInterface $delegate): self
+    {
+        return new self($delegate, [
+            self::DEFAULT_OVERRIDE_ENV_NAME,
+        ]);
+    }
 
     /**
      * @return non-empty-string|null

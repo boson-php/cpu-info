@@ -1,7 +1,12 @@
 parameters:
   level: max
   scanFiles:
+    - resources/stubs/advapi32.stub.php
     - resources/stubs/constants.stub
+    - resources/stubs/kernel32.stub.php
+  excludePaths:
+    - src/Factory/Driver/WindowsRegistry/Advapi32.php
+    - src/Factory/Driver/WindowsSysInfo/Kernel32.php
   strictRules:
     allRules: true
   fileExtensions:

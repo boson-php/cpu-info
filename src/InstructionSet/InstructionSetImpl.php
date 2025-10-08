@@ -18,6 +18,18 @@ trait InstructionSetImpl
         public readonly string $name,
     ) {}
 
+    public function equals(mixed $other): bool
+    {
+        return $other === $this
+            || ($other instanceof InstructionSetInterface
+                && $other->name === $this->name);
+    }
+
+    public function toString(): string
+    {
+        return $this->name;
+    }
+
     public function __toString(): string
     {
         return $this->name;
